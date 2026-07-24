@@ -6,10 +6,15 @@
 
 ## 本機啟動
 
+資料庫是 Postgres（Neon），本機開發需要一組 `DATABASE_URL`：
+
+- 如果你有這個 Vercel 專案的存取權限：`vercel link` 再 `vercel env pull .env.local`，會自動帶入 `DATABASE_URL`、`NEXT_PUBLIC_TILE_URL` 等變數。
+- 沒有的話：自己申請一個免費的 Postgres（例如 [Neon](https://neon.tech)），把連線字串填進 `.env` 的 `DATABASE_URL`。
+
 ```bash
 npm install
-cp .env.example .env
-npx prisma migrate dev --name init
+cp .env.example .env   # 沒有用 vercel env pull 的話，手動填入 DATABASE_URL
+npx prisma migrate deploy
 npx prisma db seed
 npm run dev
 ```
@@ -35,6 +40,10 @@ seed 腳本會建立以下帳號（**僅供本機開發使用，正式環境請�
 
 明確不做的項目、已知限制、部署前必做的事，見 [`docs/deployment.md`](docs/deployment.md)；地理查詢的擴充路徑見 [`docs/scaling-geo.md`](docs/scaling-geo.md)。
 
+## 上線環境
+
+部署在 [Vercel](https://vercel.com)，資料庫用 [Neon](https://neon.tech) Postgres（透過 Vercel Marketplace 整合），地圖圖磚用 [MapTiler](https://www.maptiler.com)。GitHub repo 已連接 Vercel，push 到 `master` 會自動觸發 Production 部署；每次 push/PR 也會先跑 GitHub Actions CI（型別檢查 + build）。
+
 ## 技術棧
 
-Next.js 14 (App Router) + TypeScript、Prisma + SQLite、Leaflet + react-leaflet、手刻 DB session 認證（bcryptjs + httpOnly cookie）、Tailwind CSS、Zod。
+Next.js 14 (App Router) + TypeScript、Prisma + Postgres（Neon）、Leaflet + react-leaflet + MapTiler 圖磚、手刻 DB session 認證（bcryptjs + httpOnly cookie）、Tailwind CSS、Zod。

@@ -10,7 +10,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: "file:./dev.db"
+      # Dummy but well-formed connection string: build only needs `prisma generate`
+      # to succeed and the Prisma Client constructor to see a valid URL — no route
+      # in this app queries the database at build time (all routes are dynamic).
+      DATABASE_URL: "postgresql://user:password@localhost:5432/dummy"
     steps:
       - uses: actions/checkout@v7
 

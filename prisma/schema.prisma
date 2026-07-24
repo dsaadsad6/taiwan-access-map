@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite has no native enum support in Prisma, so enum-like fields below are
+// plain String columns. The allowed value sets live as TS union types + Zod
+// enums in src/lib/constants.ts, which is the source of truth for validation.
+//
+// Role:              USER | ADMIN
+// PlaceCategory:     RESTAURANT | MRT_STATION | TRAIN_STATION | GOVERNMENT | PARK | STORE | OTHER
+// ModerationStatus:  APPROVED | PENDING | REJECTED
+// FeatureValue:      YES | NO | PARTIAL | UNKNOWN
+// FlagTargetType:    PLACE | REVIEW
+// FlagReason:        INACCURATE | INAPPROPRIATE | SPAM | DUPLICATE | OTHER
+// FlagStatus:        OPEN | RESOLVED_APPROVED | RESOLVED_REJECTED
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  displayName  String
+  role         String   @default("USER")
+  createdAt    DateTime @default(now())
+
+  sessions      Session[]
+  places        Place[]
+  reviews       Review[]
+  flagsFiled    Flag[]   @relation("FlagReporter")
+  flagsResolved Flag[]   @relation("FlagResolver")
+}
+
+model Session {
+  token     String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Place {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  latitude    Float
+  longitude   Float
+  address     String?
+  city        String?
+  description String?
+  status      String   @default("APPROVED")
+  isSeed      Boolean  @default(false)
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  features PlaceFeature[]
+  reviews  Review[]
+  flags    Flag[]
+
+  @@index([latitude])
+  @@index([longitude])
+  @@index([category])
+}
+
+model AccessibilityFeature {
+  id      String @id @default(cuid())
+  key     String @unique
+  labelZh String
+
+  places PlaceFeature[]
+}
+
+model PlaceFeature {
+  id          String   @id @default(cuid())
+  placeId     String
+  place       Place    @relation(fields: [placeId], references: [id])
+  featureId   String
+  feature     AccessibilityFeature @relation(fields: [featureId], references: [id])
+  value       String   @default("UNKNOWN")
+  note        String?
+  updatedById String?
+  updatedAt   DateTime @updatedAt
+
+  @@unique([placeId, featureId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  placeId   String
+  place     Place    @relation(fields: [placeId], references: [id])
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  rating    Int?
+  comment   String
+  status    String   @default("APPROVED")
+  createdAt DateTime @default(now())
+
+  flags Flag[]
+}
+
+model Flag {
+  id           String    @id @default(cuid())
+  targetType   String
+  placeId      String?
+  place        Place?    @relation(fields: [placeId], references: [id])
+  reviewId     String?
+  review       Review?   @relation(fields: [reviewId], references: [id])
+  reason       String
+  details      String?
+  reporterId   String?
+  reporter     User?     @relation("FlagReporter", fields: [reporterId], references: [id])
+  status       String    @default("OPEN")
+  createdAt    DateTime  @default(now())
+  resolvedAt   DateTime?
+  resolvedById String?
+  resolvedBy   User?     @relation("FlagResolver", fields: [resolvedById], references: [id])
+}

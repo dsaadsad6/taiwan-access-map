@@ -12,7 +12,7 @@ export default async function Home() {
       longitude: true,
       address: true,
     },
-    take: 500,
+    take: 12000,
   });
 
   return (

@@ -32,6 +32,7 @@ export function MarkerCluster({ places }: { places: PlaceMarkerData[] }) {
 
   useEffect(() => {
     const clusterGroup = L.markerClusterGroup({
+      chunkedLoading: true,
       iconCreateFunction: (cluster) => {
         const count = cluster.getChildCount();
         const size = count >= 50 ? 44 : count >= 10 ? 38 : 32;

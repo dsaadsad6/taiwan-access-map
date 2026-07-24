@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     where,
     include: { features: { include: { feature: true } } },
     orderBy: { createdAt: "desc" },
-    take: 500,
+    take: 12000,
   });
 
   return NextResponse.json({ places });

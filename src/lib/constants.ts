@@ -66,6 +66,3 @@ export type FlagStatus = (typeof FLAG_STATUSES)[number];
 
 export const ROLES = ["USER", "ADMIN"] as const;
 export type Role = (typeof ROLES)[number];
-
-export const SESSION_COOKIE_NAME = "session_token";
-export const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 30; // 30 days

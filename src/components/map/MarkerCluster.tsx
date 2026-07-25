@@ -32,7 +32,6 @@ export function MarkerCluster({ places }: { places: PlaceMarkerData[] }) {
 
   useEffect(() => {
     const clusterGroup = L.markerClusterGroup({
-      chunkedLoading: true,
       iconCreateFunction: (cluster) => {
         const count = cluster.getChildCount();
         const size = count >= 50 ? 44 : count >= 10 ? 38 : 32;
@@ -49,7 +48,7 @@ export function MarkerCluster({ places }: { places: PlaceMarkerData[] }) {
       },
     });
 
-    for (const place of places) {
+    const markers = places.map((place) => {
       const marker = L.marker([place.latitude, place.longitude], {
         icon: makeIcon(place.category),
       });
@@ -66,9 +65,13 @@ export function MarkerCluster({ places }: { places: PlaceMarkerData[] }) {
         </div>`
       );
 
-      clusterGroup.addLayer(marker);
-    }
+      return marker;
+    });
 
+    // Bulk-add in a single call (one reflow) instead of looping addLayer —
+    // also avoids a react-leaflet StrictMode double-mount race where chunked
+    // async adds from an unmounted effect could crash inside the library.
+    clusterGroup.addLayers(markers);
     map.addLayer(clusterGroup);
 
     return () => {

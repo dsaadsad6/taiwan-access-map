@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { UserPlus } from "lucide-react";
 import { Input } from "@/components/ui/Input";
@@ -39,6 +40,8 @@ export default function RegisterPage() {
       return;
     }
 
+    await signIn("credentials", { email, password, redirect: false });
+
     router.push("/");
     router.refresh();
   }
@@ -50,7 +53,23 @@ export default function RegisterPage() {
           <UserPlus className="h-5 w-5 text-brand-600 dark:text-brand-400" />
           註冊
         </h1>
-        <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-3">
+
+        <Button
+          type="button"
+          variant="secondary"
+          className="mt-5 w-full"
+          onClick={() => signIn("google", { callbackUrl: "/" })}
+        >
+          使用 Google 繼續
+        </Button>
+
+        <div className="my-5 flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500">
+          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+          或使用 email
+          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <Input
             type="text"
             required

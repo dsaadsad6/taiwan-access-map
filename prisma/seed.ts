@@ -24,6 +24,7 @@ async function main() {
       email: "admin@example.com",
       passwordHash: adminPasswordHash,
       displayName: "管理員",
+      name: "管理員",
       role: "ADMIN",
     },
   });
@@ -36,6 +37,7 @@ async function main() {
       email: "demo@example.com",
       passwordHash: demoPasswordHash,
       displayName: "示範使用者",
+      name: "示範使用者",
       role: "USER",
     },
   });

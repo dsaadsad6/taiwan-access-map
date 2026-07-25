@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Accessibility, Plus, ShieldCheck, LogIn, UserPlus, LogOut } from "lucide-react";
+import { Accessibility, Plus, ShieldCheck, LogIn, UserPlus } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { Button } from "@/components/ui/Button";
+import { LogoutButton } from "@/components/LogoutButton";
 
 export async function Header() {
   const user = await getCurrentUser();
@@ -36,12 +37,7 @@ export async function Header() {
             <span className="hidden text-sm text-slate-500 dark:text-slate-400 md:inline">
               {user.displayName}
             </span>
-            <form action="/api/auth/logout" method="post">
-              <Button type="submit" variant="ghost" size="sm">
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">登出</span>
-              </Button>
-            </form>
+            <LogoutButton />
           </>
         ) : (
           <>

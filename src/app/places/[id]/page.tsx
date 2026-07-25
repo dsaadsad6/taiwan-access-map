@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { ArrowLeft, MapPin, MessageSquare, Star } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
@@ -14,6 +15,29 @@ import {
   type PlaceCategory,
   type FeatureValue,
 } from "@/lib/constants";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  const place = await prisma.place.findUnique({
+    where: { id: params.id },
+    select: { name: true, category: true, city: true, address: true, status: true },
+  });
+
+  if (!place || place.status !== "APPROVED") {
+    return { title: "找不到這個地點" };
+  }
+
+  const categoryLabel = PLACE_CATEGORY_LABELS[place.category as PlaceCategory] ?? place.category;
+  const location = [place.city, place.address].filter(Boolean).join(" ");
+
+  return {
+    title: `${place.name}無障礙設施資訊 | 台灣無障礙地圖`,
+    description: `${place.name}（${categoryLabel}${location ? ` · ${location}` : ""}）的無障礙設施標註與使用者評論，包含坡道、電梯、無障礙廁所等資訊。`,
+  };
+}
 
 export default async function PlaceDetailPage({
   params,
